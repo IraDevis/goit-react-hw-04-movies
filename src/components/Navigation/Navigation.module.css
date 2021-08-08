@@ -1,10 +1,10 @@
 .navLink {
-  margin: 10px;
+  margin: 15px;
   padding: 5px;
-  color: darkslateblue;
+  color: black;
   font-weight: bold;
 }
 
 .activeNavLink {
-  color: darkmagenta;
+  color: darkslateblue;
 }
