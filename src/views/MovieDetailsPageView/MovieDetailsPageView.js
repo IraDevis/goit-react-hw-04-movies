@@ -7,19 +7,25 @@ import {
   useHistory,
   useRouteMatch,
 } from "react-router-dom";
-import { useState, useEffect } from "react";
-import CastView from "../CastView/CastView";
-import ReviewsView from "../ReviewsView/ReviewsView";
+import { useState, useEffect, lazy, Suspense } from "react";
 import fetch from "../../sevices/moviesAPI";
+import photoDefault from "../../images/noimages.png";
 
 import styles from "./MovieDetailsPageView.module.css";
+
+const CastView = lazy(() =>
+  import("../CastView/CastView.js" /* webpackChunkName: "cast-view"*/)
+);
+const ReviewsView = lazy(() =>
+  import("../ReviewsView/ReviewsView.js" /* webpackChunkName: "reviews-view"*/)
+);
 
 export default function MovieDetailsPageView() {
   const { movieId } = useParams();
   const { url } = useRouteMatch();
   const history = useHistory();
   const location = useLocation();
-  const [poster, setPoster] = useState("");
+  const [poster, setPoster] = useState(photoDefault);
   const [title, setTitle] = useState("");
   const [userScore, setUserScore] = useState("");
   const [overview, setOverview] = useState("");
@@ -29,7 +35,9 @@ export default function MovieDetailsPageView() {
     fetch
       .getDetails(movieId)
       .then((response) => {
-        setPoster(`https://image.tmdb.org/t/p/w500${response.poster_path}`);
+        if (response.poster_path) {
+          setPoster(`https://image.tmdb.org/t/p/w500${response.poster_path}`);
+        }
         setTitle(response.title);
         setUserScore(response.vote_average);
         setOverview(response.overview);
@@ -74,23 +82,23 @@ export default function MovieDetailsPageView() {
                 to={{ ...location, pathname: `${url}/reviews` }}
               >
                 Reviews
-              </NavLink>{" "}
+              </NavLink>
             </li>
           </ul>
         </div>
       </div>
 
-      {/* <div className='container'> */}
-      <Switch>
-        <Route path={`${url}/cast`}>
-          <CastView id={movieId} />
-        </Route>
+      <Suspense fallback={<h3>Loading... Wait, please</h3>}>
+        <Switch>
+          <Route path={`${url}/cast`}>
+            <CastView id={movieId} />
+          </Route>
 
-        <Route path={`${url}/reviews`}>
-          <ReviewsView id={movieId} />
-        </Route>
-      </Switch>
-      {/* </div> */}
+          <Route path={`${url}/reviews`}>
+            <ReviewsView id={movieId} />
+          </Route>
+        </Switch>
+      </Suspense>
     </div>
   );
 }
